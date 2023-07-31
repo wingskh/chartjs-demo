@@ -3,6 +3,7 @@ import Chart from 'chart.js/auto';
 import './MultiAxesBarChart.css'
 import { convertStringToPriceFormat, parseToDouble } from '../../Util/general';
 
+const lineWidth = 3
 // Define the plugin
 const addButtonPlugin = {
   id: 'addButton',
@@ -26,7 +27,6 @@ export const MultiAxesBarChart = () => {
     const value = [[1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13, 14], [14, 13, 12, 11, 10, 9, 8], [8, 7, 6, 5, 4, 3, 2], [7, 7, 8, 11, 2, 6, 9], [7, 7, 8, 11, 2, 6, 9], [7, 7, 8, 11, 2, 6, 9]];
 
     let hoverValue = undefined;
-    const lineWidth = 3
     const hoverSegment = {
       id: 'hoverSegment',
       beforeDatasetsDraw(chart, args, pluginOptions) {
@@ -222,10 +222,10 @@ export const MultiAxesBarChart = () => {
 
         const canvasWidth = parseToDouble(width.slice(0, -2));
         const canvasHeight = parseToDouble(height.slice(0, -2));
-        
+
         const centerX = (positionX + canvasWidth) / 2;
         const centerY = (positionY + canvasHeight) / 2;
-        const tooltipStartX = tooltip.caretX < centerX ? positionX + tooltip.caretX + segment / 2 : positionX + tooltip.caretX - tooltipBox.offsetWidth - segment / 2;
+        const tooltipStartX = tooltip.caretX < centerX ? positionX + tooltip.caretX + segment / 2 + lineWidth / 2 : positionX + tooltip.caretX - tooltipBox.offsetWidth - segment / 2 - lineWidth;
         tooltipBox.style.left = Math.max(tooltipStartX, positionX) + 'px';
         tooltipBox.style.top = Math.max(centerY - tooltipBox.offsetHeight / 2, positionY) + 'px';
       };
