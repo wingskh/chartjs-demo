@@ -1,6 +1,11 @@
 export const convertStringToPriceFormat = (priceString) => {
-  const number = parseFloat(priceString);
-  const formattedPrice = number.toLocaleString('en-US', {
+  const number = parseFloat(priceString.replaceAll(',', ''));
+  const formattedPrice = convertFloatToPriceFormat(number)
+  return formattedPrice;
+}
+
+export const convertFloatToPriceFormat = (price) => {
+  const formattedPrice = price.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });

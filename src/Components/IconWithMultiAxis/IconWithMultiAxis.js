@@ -1,58 +1,112 @@
 import React, { useRef, useEffect, useState } from "react";
 import Chart from "chart.js/auto";
-import style from "./MultiAxesBarChart.module.css";
-import { convertStringToPriceFormat, parseToDouble, convertFloatToPriceFormat } from "../../Util/general";
-import { set } from "react-hook-form";
+import style from "./IconWithMultiAxis.module.css";
+import { convertStringToPriceFormat, parseToDouble } from "../../Util/general";
+import ballImage from "../../assets/images/ball.png";
+import cardImage from "../../assets/images/card.png";
+import casinoImage from "../../assets/images/casino.png";
+import footballImage from "../../assets/images/football.png";
+import gameImage from "../../assets/images/game.png";
+import horseImage from "../../assets/images/horse.png";
+import mahjongImage from "../../assets/images/mahjong.png";
 
 const lineWidth = 3;
-// Define the plugin
-const addButtonPlugin = {
-  id: "addButton",
-  beforeDraw: (chart) => {
-    const { ctx, canvas } = chart;
-    const button = document.createElement("button");
-    button.innerText = "Click me!";
-    button.onclick = () => alert("Button clicked!");
-    canvas.parentNode.appendChild(button);
-    const { left, top, width, height } = chart.chartArea;
-    button.style.position = "absolute";
-    button.style.left = `${width - left}px`;
-    button.style.top = `${height - top + 30}px`; // adjust this value to change the button's position
-  },
-};
-const time = [
-  "2022/12/08 0:00",
-  "2022/12/08 4:00",
-  "2022/12/08 8:00",
-  "2022/12/08 12:00",
-  "2022/12/08 16:00",
-  "2022/12/08 20:00",
-  "2022/12/08 23:59",
-];
-// const value = {
-//   sport: [1, 2, 3, 4, 5, 6, 7],
-//   liveDealer: [8, 9, 10, 11, 12, 13, 14],
-//   lottery: [14, 13, 12, 11, 10, 9, 8],
-//   chess: [8, 7, 6, 5, 4, 3, 2],
-//   slotMachine: [5, 16, 3, 9, 8, 4, 0],
-//   fishing: [7, 7, 8, 11, 2, 6, 9],
-//   horseRacing: [7, 7, 8, 11, 2, 6, 9]
-// };
-const value = [
-  [1, 2, 3, 4, 5, 6, 7],
-  [8, 9, 10, 11, 12, 13, 14],
-  [14, 13, 12, 11, 10, 9, 8],
-  [8, 7, 6, 5, 4, 3, 2],
-  [5, 16, 3, 9, 8, 4, 0],
-  [7, 7, 8, 11, 2, 6, 9],
-  [7, 7, 8, 11, 2, 6, 9]
-];
-
-export const MultiAxesBarChart = () => {
+export const IconWithMultiAxis = () => {
   const chartContainerRef = useRef(null);
-  const [barPercentageState, setBarPercentageState] = useState(1);
+  const imageSize = 25;
+  const containerRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [mouseDownX, setMouseDownX] = useState(null);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const handleMouseDown = (event) => {
+    setIsDragging(true);
+    setMouseDownX(event.clientX);
+    setScrollLeft(containerRef.current.scrollLeft);
+  };
+
+  const handleMouseMove = (event) => {
+    if (!isDragging) return;
+    const dx = event.clientX - mouseDownX;
+    containerRef.current.scrollLeft = scrollLeft - dx;
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
   useEffect(() => {
+    const time = [
+      "2022/12/08 0:00",
+      "2022/12/08 4:00",
+      "2022/12/08 8:00",
+      "2022/12/08 12:00",
+      "2022/12/08 16:00",
+      "2022/12/08 20:00",
+      "2022/12/08 23:59",
+    ];
+    const images = [
+      ballImage,
+      cardImage,
+      casinoImage,
+      footballImage,
+      gameImage,
+      horseImage,
+      gameImage,
+      mahjongImage,
+    ].map((png) => {
+      const image = new Image();
+      image.src = png;
+      return image;
+    });
+    const imageItems = {
+      id: "imageItems",
+      beforeDatasetsDraw(chart, args, pluginOptions) {
+        const {
+          ctx,
+          canvas,
+          data,
+          chartArea: { top, bottom, left, right, width, height },
+          scales: { x, y },
+        } = chart;
+        ctx.save();
+
+        // data.datasets[0].image.forEach((imageLink, index) => {
+        //   const logo = new Image();
+        //   logo.src = imageLink.src;
+        //   ctx.drawImage(
+        //     logo,
+        //     x.getPixelForValue(index) - imageSize / 2,
+        //     chart.height - 50,
+        //     imageSize,
+        //     imageSize
+        //   );
+        // });
+        data.datasets.forEach((dataset, index) => {
+          const logo = new Image();
+          logo.src = dataset.image.src;
+          chart.getDatasetMeta(index).data.forEach((pos, i) => {
+            ctx.drawImage(
+              logo,
+              pos.x - imageSize / 2,
+              bottom + imageSize / 1.5,
+              imageSize,
+              imageSize
+            );
+          });
+          // ctx.font = `20px sans-serif`;
+          // const text = x.getLabelForValue(index).split(" ")[1];
+          // const textWidth = ctx.measureText(text).width;
+          // ctx.fillStyle = '#98A2B3';
+          // ctx.fillText(
+          //   text,
+          //   x.getPixelForValue(index) - textWidth / 2,
+          //   chart.height,
+          // );
+        });
+      },
+    };
+
     let hoverValue = undefined;
     const hoverSegment = {
       id: "hoverSegment",
@@ -78,14 +132,14 @@ export const MultiAxesBarChart = () => {
           ctx.strokeStyle = "#2E8FF8";
           ctx.beginPath();
           ctx.moveTo(x.getPixelForValue(hoverValue) - segment / 2, top);
-          ctx.lineTo(x.getPixelForValue(hoverValue) - segment / 2, bottom + 10);
+          ctx.lineTo(x.getPixelForValue(hoverValue) - segment / 2, bottom + imageSize * 2.5);
           ctx.moveTo(
             x.getPixelForValue(hoverValue) + segment / 2 - lineWidth / 2,
             top
           );
           ctx.lineTo(
             x.getPixelForValue(hoverValue) + segment / 2 - lineWidth / 2,
-            bottom + 10
+            bottom + imageSize * 2.5
           );
           ctx.stroke();
         }
@@ -135,131 +189,50 @@ export const MultiAxesBarChart = () => {
       },
     };
 
-    const getOrCreateLegendList = (chart, id) => {
-      const legendContainer = document.getElementById(id);
-      let listContainer = legendContainer.querySelector("ul");
-
-      if (!listContainer) {
-        listContainer = document.createElement("ul");
-        listContainer.classList.add(style["legendListContainer"]);
-
-        legendContainer.appendChild(listContainer);
-      }
-
-      return listContainer;
-    };
-
-    const htmlLegendPlugin = {
-      id: "htmlLegend",
-      afterUpdate(chart, args, options) {
-        const ul = getOrCreateLegendList(chart, options.containerID);
-
-        // Remove old legend items
-        while (ul.firstChild) {
-          ul.firstChild.remove();
-        }
-
-        // Reuse the built-in legendItems generator
-        const items = chart.options.plugins.legend.labels.generateLabels(chart);
-
-        items.forEach((item) => {
-          const li = document.createElement("li");
-          li.classList.add(style["legendLiContainer"]);
-          li.onclick = () => {
-            const { type } = chart.config;
-            if (type === "pie" || type === "doughnut") {
-              // Pie and doughnut charts only have a single dataset and visibility is per item
-              chart.toggleDataVisibility(item.index);
-            } else {
-              chart.setDatasetVisibility(
-                item.datasetIndex,
-                !chart.isDatasetVisible(item.datasetIndex)
-              );
-            }
-            chart.update();
-          };
-
-          // Color box
-          const legendItemContainer = document.createElement("div");
-          legendItemContainer.classList.add(style["legendItemContainer"]);
-          legendItemContainer.style.color = item.hidden ? '#98A2B3' : '#1D2939';
-          legendItemContainer.style.backgroundColor = item.hidden ? '#E4E7EC' : '#f2f4f7';
-          const legendUpperItem = document.createElement("div");
-          legendUpperItem.classList.add(style["legendUpperItem"]);
-          const legendColorBox = document.createElement("span");
-          legendColorBox.classList.add(style["legendColorBox"]);
-
-          legendColorBox.style.background = item.hidden ? '#98A2B3' : item.fillStyle;
-          legendColorBox.style.borderColor = item.strokeStyle;
-          legendColorBox.style.borderWidth = item.lineWidth + "px";
-
-          legendUpperItem.appendChild(legendColorBox);
-          legendUpperItem.appendChild(document.createTextNode(item.text));
-
-          const legendLowerItem = document.createElement("div");
-          legendLowerItem.classList.add(style["legendLowerItem"]);
-          // Text
-          const textContainer = document.createElement("div");
-          textContainer.classList.add(style['legendItemSum'])
-          // textContainer.style.margin = 0;
-          // textContainer.style.padding = 0;
-          // textContainer.style.textDecoration = item.hidden
-          //   ? "line-through"
-          //   : "";
-          const text = document.createTextNode(convertFloatToPriceFormat(value[item.datasetIndex].reduce((total, num) => total + num)));
-          textContainer.appendChild(text);
-          legendLowerItem.appendChild(textContainer);
-
-          legendItemContainer.appendChild(legendUpperItem);
-          legendItemContainer.appendChild(legendLowerItem);
-
-
-
-
-          li.appendChild(legendItemContainer);
-          // li.appendChild(textContainer);
-          ul.appendChild(li);
-        });
-      },
-    };
-
     const data = {
       labels: time,
       datasets: [
         {
           label: "體育",
-          data: value[0],
+          data: [1, 2, 3, 4, 5, 6, 7],
           backgroundColor: "#65C2FD",
+          image: images[0],
         },
         {
           label: "真人荷官",
-          data: value[1],
+          data: [8, 9, 10, 11, 12, 13, 14],
           backgroundColor: "#F74E6F",
+          image: images[1],
         },
         {
           label: "彩票",
-          data: value[2],
+          data: [14, 13, 12, 11, 10, 8.9, 8],
           backgroundColor: "#FFC16D",
+          image: images[2],
         },
         {
           label: "棋牌",
-          data: value[3],
+          data: [8, 7, 6, 5, 4, 3, 2],
           backgroundColor: "#40D29D",
+          image: images[3],
         },
         {
           label: "老虎機",
-          data: value[4],
+          data: [7, 7, 8, 11, 2, 6, 9],
           backgroundColor: "#5C48C9",
+          image: images[4],
         },
         {
           label: "捕魚",
-          data: value[5],
+          data: [7, 7, 8, 11, 2, 6, 9],
           backgroundColor: "#3172FD",
+          image: images[5],
         },
         {
           label: "賽馬",
-          data: value[6],
+          data: [7, 7, 8, 11, 2, 6, 9],
           backgroundColor: "#F59961",
+          image: images[6],
         },
       ],
     };
@@ -268,23 +241,23 @@ export const MultiAxesBarChart = () => {
       let tooltipContainer = chart.canvas.parentNode.querySelector("div");
       if (!tooltipContainer) {
         tooltipContainer = document.createElement("DIV");
-        tooltipContainer.classList.add(style["tooltipContainer"]);
+        tooltipContainer.classList.add(style['tooltipContainer']);
 
         const tooltipTitleContainer = document.createElement("DIV");
-        tooltipTitleContainer.classList.add(style["tooltipTitleContainer"]);
+        tooltipTitleContainer.classList.add(style['tooltipTitleContainer']);
 
         const tooltipTitleLeft = document.createElement("DIV");
-        tooltipTitleLeft.classList.add(style["tooltipTitleLeft"]);
+        tooltipTitleLeft.classList.add(style['tooltipTitleLeft']);
         tooltipTitleContainer.appendChild(tooltipTitleLeft);
 
         const tooltipTitleRight = document.createElement("DIV");
-        tooltipTitleRight.classList.add(style["tooltipTitleRight"]);
+        tooltipTitleRight.classList.add(style['tooltipTitleRight']);
         tooltipTitleContainer.appendChild(tooltipTitleRight);
 
         tooltipContainer.appendChild(tooltipTitleContainer);
 
         const tooltipBodyContainer = document.createElement("UL");
-        tooltipBodyContainer.classList.add(style["tooltipBodyContainer"]);
+        tooltipBodyContainer.classList.add(style['tooltipBodyContainer']);
         tooltipContainer.appendChild(tooltipBodyContainer);
 
         chart.canvas.parentNode.appendChild(tooltipContainer);
@@ -304,16 +277,12 @@ export const MultiAxesBarChart = () => {
 
       // 4 tooltip text
       if (tooltip.body) {
-        const tooltipTitleLeft = tooltipBox.querySelector(
-          `.${style["tooltipTitleLeft"]}`
-        );
-        const tooltipTitleRight = tooltipBox.querySelector(
-          `.${style["tooltipTitleRight"]}`
-        );
+        const tooltipTitleLeft = tooltipBox.querySelector(`.${style['tooltipTitleLeft']}`);
+        const tooltipTitleRight =
+          tooltipBox.querySelector(`.${style['tooltipTitleRight']}`);
         const tooltipBodyContainer = tooltipBox.querySelector(
-          `.${style["tooltipBodyContainer"]}`
+          `.${style['tooltipBodyContainer']}`
         );
-
         while (tooltipBodyContainer.firstChild) {
           tooltipBodyContainer.firstChild.remove();
         }
@@ -352,6 +321,7 @@ export const MultiAxesBarChart = () => {
           tooltipBody.appendChild(leftBody);
           tooltipBody.appendChild(
             document.createTextNode(convertStringToPriceFormat(allText[1]))
+            // document.createTextNode(allText[1])
           );
           tooltipLI.appendChild(tooltipBody);
           tooltipBodyContainer.appendChild(tooltipLI);
@@ -371,16 +341,17 @@ export const MultiAxesBarChart = () => {
         const canvasWidth = parseToDouble(width.slice(0, -2));
         const canvasHeight = parseToDouble(height.slice(0, -2));
 
-        const centerX = (positionX + canvasWidth) / 2;
+        const centerX = containerRef.current.clientWidth / 2
         const centerY = (positionY + canvasHeight) / 2;
+
         const tooltipStartX =
-          tooltip.caretX < centerX
+          (tooltip.caretX - containerRef.current.scrollLeft < centerX
             ? positionX + tooltip.caretX + segment / 2 + lineWidth / 2
             : positionX +
             tooltip.caretX -
             tooltipBox.offsetWidth -
             segment / 2 -
-            lineWidth;
+            lineWidth) - containerRef.current.scrollLeft;
         tooltipBox.style.left = Math.max(tooltipStartX, positionX) + "px";
         tooltipBox.style.top =
           Math.max(centerY - tooltipBox.offsetHeight / 2, positionY) + "px";
@@ -393,36 +364,28 @@ export const MultiAxesBarChart = () => {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        categoryPercentage: 0.8,
+        barPercentage: 0.9,
         plugins: {
           tooltip: {
             enabled: false,
             external: externalTooltipHandler,
             intersect: false,
           },
-          htmlLegend: {
-            // ID of the container to put the legend in
-            containerID: "legend-container",
-          },
           legend: {
-            display: false,
-            onLeave: (event, legendItem, legend) => {
-              console.log(event);
-              console.log(legendItem);
-              console.log(legend);
-            },
-            onClick: (event, legendItem, legend) => {
-              console.log(event);
-              console.log(legendItem);
-              console.log(legend);
-            }
+            display: false
           },
         },
         interaction: {
           mode: "index",
         },
+        // layout: {
+        //   padding: {
+        //     bottom: 50,
+        //   },
+        // },
         scales: {
           x: {
-            // offset: false,
             border: {
               display: false,
             },
@@ -433,13 +396,18 @@ export const MultiAxesBarChart = () => {
                   return "rgba(102, 102, 102, 0.1)";
                 }
               },
-              tickLength: 10,
+              tickLength: imageSize * 2.5,
             },
             ticks: {
               callback: function (val, index) {
                 return this.getLabelForValue(val).split(" ")[1];
               },
-              // color: 'red',
+              // display: false,
+              padding: 0,
+              color: '#98A2B3',
+              font: {
+                size: 18
+              }
             },
           },
           y: {
@@ -458,19 +426,13 @@ export const MultiAxesBarChart = () => {
             borderColor: "rgba(255, 255, 255, 1)",
             borderWidth: 2,
             borderRadius: 50,
-            borderSkipped: false,
-            // barThickness: 40,
-            // maxBarThickness: 40,
-            // borderColor: "rgba(0,0,0,0)",
-            // borderWidth: 10,
             barPercentage: 0.3,
             categoryPercentage: 1,
-            hoverBorderWidth: 1,
+            borderSkipped: false,
           },
         },
       },
-      // plugins: [hoverSegment, htmlLegendPlugin],
-      plugins: [hoverSegment, htmlLegendPlugin],
+      plugins: [hoverSegment, imageItems],
     };
 
     // data.labels.unshift('');
@@ -478,23 +440,26 @@ export const MultiAxesBarChart = () => {
     // data.datasets.forEach((e) => e.data.unshift(null))
     // data.datasets.forEach((e) => e.data.push(null))
     const chart = new Chart(chartContainerRef.current, chartConfig);
-    // Register the plugin
-    // Chart.register(addButtonPlugin);
 
-    // Return a cleanup function to destroy the chart and unregister the plugin
+
     return () => {
       chart.destroy();
       // Chart.unregister(addButtonPlugin);
     };
   }, []);
 
-
   return (
     <div className={style['container']}>
-      <div id="legend-container" className={style["legendContainer"]} />
-      <div className={style["canvasContainer"]}>
-        <div className={style["canvasContainerBody"]}>
-          <canvas className={style["canvasContent"]} ref={chartContainerRef} />
+      <div
+        ref={containerRef}
+        className={style['canvasContainer']}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
+        <div className={style['canvasContainerBody']}>
+          <canvas id="canvas" className={style['canvasContent']} ref={chartContainerRef} />
         </div>
       </div>
     </div>

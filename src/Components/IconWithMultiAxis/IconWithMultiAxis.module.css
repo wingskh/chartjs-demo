@@ -1,19 +1,39 @@
+.container {
+  display: flex;
+  flex: 1;
+  margin-top: 10%;
+}
 .tooltipContainer {
   background: rgb(71, 84, 103);
-  border-radius: 20px;
+  border-radius: 8px;
   color: white;
   opacity: 1;
   pointer-events: none;
   position: absolute;
   transform: translate (-50%, 0);
   transition: all 0.1s ease;
-  min-width: 280px;
-  padding: 25px;
+  width: fit-content;
+  padding: 10px;
+  z-index: 999;
 }
 .tooltipTitleContainer {
   display: flex;
   align-items: center;
   justify-content: start;
+}
+.canvasContainer {
+  width: 200%;
+  max-width: 100%;
+  overflow-x: scroll;
+  cursor: grab;
+}
+.canvasContainerBody {
+  height: 500px;
+  width: 200%;
+}
+.canvasContent {
+  width: 100% !important;
+  height: 100% !important;
 }
 .tooltipTitleLeft {
   font-weight: bold;
@@ -29,19 +49,20 @@
   text-transform: uppercase;
 }
 .colorSquare {
-  width: 20px;
-  height: 20px;
+  width: 10px;
+  height: 10px;
   display: inline-block;
   margin-right: 10px;
-  border-radius: 8px;
-  border-width: 2px !important;
+  border-radius: 4px;
+  border-width: 1px !important;
 }
 .tooltipBodyItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 15px;
+  margin-top: 5px;
   font-weight: 400;
+  font-size: 8px;
 }
 .tooltipLeftBody {
   display: flex;

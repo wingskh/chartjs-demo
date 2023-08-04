@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+  flex: 1;
+  position: relative;
+  margin-top: 100px;
+}
+
+.canvasContainer {
+  position: relative;
+  z-index: 1;
+  width: 100% !important;
+  height: 500px !important;
+}
+
+.canvasContent {
+  width: 100% !important;
+  height: 100% !important;
+}
+.detailLogo {
+  width: 10px;
+  height: 10px;
+}
